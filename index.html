@@ -11,9 +11,6 @@
       background-color: #f4f4f4;
       padding: 20px;
     }
-    h2 {
-      margin-bottom: 10px;
-    }
     input {
       padding: 10px;
       font-size: 16px;
@@ -21,9 +18,10 @@
       margin: 5px;
     }
     button {
-      padding: 10px 20px;
+      margin-top: 10px;
+      padding: 10px 25px;
       font-size: 16px;
-      background-color: #6200ee;
+      background-color: #6a00ff;
       color: white;
       border: none;
       border-radius: 5px;
@@ -32,7 +30,11 @@
     #calculator {
       width: 100%;
       height: 500px;
-      margin-top: 20px;
+      margin-top: 30px;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -40,45 +42,50 @@
 
   <h2>Graficador de Desigualdades Lineales</h2>
 
-  <input type="text" id="ineq1" placeholder="Ej: y <= 7 - 2x">
-  <input type="text" id="ineq2" placeholder="Ej: y >= x + 3">
+  <input type="text" id="ineq1" placeholder="Ej: y <= x + 7">
+  <input type="text" id="ineq2" placeholder="Ej: y >= 8 + x">
   <br>
   <button onclick="graficar()">Graficar región de solución</button>
 
+  <div id="error" class="error"></div>
   <div id="calculator"></div>
 
   <script>
-    // Iniciar Desmos
     const calculator = Desmos.GraphingCalculator(document.getElementById('calculator'), {
       expressions: true,
       settingsMenu: false,
       keypad: false
     });
 
-    // Función que convierte operadores normales a LaTeX
     function convertirALatex(expr) {
       return expr
         .replace(/<=/g, '\\le ')
         .replace(/>=/g, '\\ge ')
+        .replace(/=/g, '=')
         .replace(/</g, '<')
         .replace(/>/g, '>');
     }
 
-    // Función principal
     function graficar() {
-      calculator.setExpressions([]); // Limpiar gráfico
+      const ineq1 = document.getElementById('ineq1').value.trim();
+      const ineq2 = document.getElementById('ineq2').value.trim();
+      const errorDiv = document.getElementById('error');
+      errorDiv.innerText = "";
 
-      const expresion1 = document.getElementById('ineq1').value.trim();
-      const expresion2 = document.getElementById('ineq2').value.trim();
+      calculator.setExpressions([]);
 
-      if (expresion1 !== '') {
-        const latex1 = convertirALatex(expresion1);
-        calculator.setExpression({ id: 'ineq1', latex: latex1 });
-      }
-
-      if (expresion2 !== '') {
-        const latex2 = convertirALatex(expresion2);
-        calculator.setExpression({ id: 'ineq2', latex: latex2 });
+      try {
+        if (ineq1) {
+          const latex1 = convertirALatex(ineq1);
+          calculator.setExpression({ id: 'ineq1', latex: latex1 });
+        }
+        if (ineq2) {
+          const latex2 = convertirALatex(ineq2);
+          calculator.setExpression({ id: 'ineq2', latex: latex2 });
+        }
+      } catch (e) {
+        errorDiv.innerText = "❌ Error al graficar. Verifica tus desigualdades.";
+        console.error("Error al graficar:", e);
       }
     }
   </script>
