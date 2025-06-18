@@ -9,12 +9,10 @@
       font-family: Arial, sans-serif;
       text-align: center;
       background-color: #f4f4f4;
+      padding: 20px;
     }
     h2 {
-      margin-top: 20px;
-    }
-    .input-group {
-      margin: 15px;
+      margin-bottom: 10px;
     }
     input {
       padding: 10px;
@@ -23,19 +21,18 @@
       margin: 5px;
     }
     button {
-      margin-top: 10px;
-      padding: 10px 25px;
+      padding: 10px 20px;
       font-size: 16px;
       background-color: #6200ee;
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 5px;
       cursor: pointer;
     }
     #calculator {
       width: 100%;
       height: 500px;
-      margin-top: 30px;
+      margin-top: 20px;
     }
   </style>
 </head>
@@ -43,46 +40,46 @@
 
   <h2>Graficador de Desigualdades Lineales</h2>
 
-  <div class="input-group">
-    <input type="text" id="ineq1" placeholder="Ej: y <= 7 - 2x">
-    <input type="text" id="ineq2" placeholder="Ej: y >= x + 3">
-  </div>
-
+  <input type="text" id="ineq1" placeholder="Ej: y <= 7 - 2x">
+  <input type="text" id="ineq2" placeholder="Ej: y >= x + 3">
+  <br>
   <button onclick="graficar()">Graficar región de solución</button>
 
   <div id="calculator"></div>
 
   <script>
+    // Iniciar Desmos
     const calculator = Desmos.GraphingCalculator(document.getElementById('calculator'), {
       expressions: true,
       settingsMenu: false,
       keypad: false
     });
 
+    // Función que convierte operadores normales a LaTeX
     function convertirALatex(expr) {
       return expr
         .replace(/<=/g, '\\le ')
         .replace(/>=/g, '\\ge ')
-        .replace(/</g, '<')   // Estos ya están en LaTeX
+        .replace(/</g, '<')
         .replace(/>/g, '>');
     }
 
+    // Función principal
     function graficar() {
-      calculator.setExpressions([]);
+      calculator.setExpressions([]); // Limpiar gráfico
 
-      const ineqs = [
-        document.getElementById("ineq1").value.trim(),
-        document.getElementById("ineq2").value.trim()
-      ];
+      const expresion1 = document.getElementById('ineq1').value.trim();
+      const expresion2 = document.getElementById('ineq2').value.trim();
 
-      let id = 1;
-      ineqs.forEach(expr => {
-        if (expr !== "") {
-          const latexExpr = convertirALatex(expr);
-          calculator.setExpression({ id: "ineq" + id, latex: latexExpr });
-          id++;
-        }
-      });
+      if (expresion1 !== '') {
+        const latex1 = convertirALatex(expresion1);
+        calculator.setExpression({ id: 'ineq1', latex: latex1 });
+      }
+
+      if (expresion2 !== '') {
+        const latex2 = convertirALatex(expresion2);
+        calculator.setExpression({ id: 'ineq2', latex: latex2 });
+      }
     }
   </script>
 
