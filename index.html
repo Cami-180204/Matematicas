@@ -2,43 +2,89 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Graficador de Desigualdades</title>
+  <title>Graficador de Desigualdades Lineales</title>
   <script src="https://www.desmos.com/api/v1.6/calculator.js?apiKey=YOUR_API_KEY"></script>
   <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+    }
+    input {
+      margin: 10px;
+      padding: 8px;
+      font-size: 16px;
+      width: 250px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #6200EE;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
     #calculator {
       width: 100%;
       height: 500px;
-    }
-    input, button {
-      font-size: 16px;
-      margin: 10px 0;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
 
-  <h2>Graficador de Desigualdades con Dos Variables</h2>
-  <label for="inequality">Ingresa una desigualdad (ejemplo: y &lt;= -x + 5):</label><br>
-  <input type="text" id="inequality" placeholder="y <= -x + 5" size="30">
-  <button onclick="graficar()">Graficar</button>
+  <div class="container">
+    <h2>Graficador de Desigualdades Lineales</h2>
 
-  <div id="calculator"></div>
+    <div>
+      <input type="text" id="ineq1" placeholder="Desigualdad 1 (ej. y<=7-2x)">
+      <input type="text" id="ineq2" placeholder="Desigualdad 2 (opcional)">
+      <br>
+      <input type="text" id="ineq3" placeholder="Desigualdad 3 (opcional)">
+      <input type="text" id="ineq4" placeholder="Desigualdad 4 (opcional)">
+    </div>
+
+    <button onclick="graficar()">Graficar región de solución</button>
+
+    <div id="calculator"></div>
+  </div>
 
   <script>
-    // Crear el graficador Desmos
-    const elt = document.getElementById('calculator');
-    const calculator = Desmos.GraphingCalculator(elt, {
+    const calculator = Desmos.GraphingCalculator(document.getElementById('calculator'), {
       expressions: true,
-      settingsMenu: false
+      settingsMenu: false,
+      keypad: false
     });
 
-    // Función para graficar la desigualdad
     function graficar() {
-      const expr = document.getElementById('inequality').value;
+      // Limpiar expresiones previas
       calculator.setExpressions([]);
-      calculator.setExpression({ id: 'inequality1', latex: expr });
+
+      // Obtener valores de entradas
+      const inputs = [
+        document.getElementById('ineq1').value,
+        document.getElementById('ineq2').value,
+        document.getElementById('ineq3').value,
+        document.getElementById('ineq4').value
+      ];
+
+      // Filtrar entradas vacías y asignar IDs únicos
+      let count = 1;
+      inputs.forEach(expr => {
+        if (expr.trim() !== '') {
+          calculator.setExpression({ id: 'ineq' + count, latex: expr.trim() });
+          count++;
+        }
+      });
     }
   </script>
 
 </body>
 </html>
+
