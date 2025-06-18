@@ -2,8 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Graficador de Desigualdades Lineales</title>
-  <script src="https://www.desmos.com/api/v1.6/calculator.js"></script>
+  <title>Graficador de Desigualdades con Dos Variables</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,84 +10,20 @@
       background-color: #f4f4f4;
       padding: 20px;
     }
-    input {
-      padding: 10px;
-      font-size: 16px;
-      width: 250px;
-      margin: 5px;
-    }
-    button {
-      margin-top: 10px;
-      padding: 10px 25px;
-      font-size: 16px;
-      background-color: #6a00ff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    #calculator {
+    iframe {
       width: 100%;
-      height: 500px;
-      margin-top: 30px;
-    }
-    .error {
-      color: red;
-      font-weight: bold;
+      height: 600px;
+      border: none;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
 
-  <h2>Graficador de Desigualdades Lineales</h2>
+  <h2>Graficador de Desigualdades con Desmos (iframe)</h2>
+  <p>Haz clic aquí para editar y graficar tus desigualdades:</p>
 
-  <input type="text" id="ineq1" placeholder="Ej: y <= x + 7">
-  <input type="text" id="ineq2" placeholder="Ej: y >= 8 + x">
-  <br>
-  <button onclick="graficar()">Graficar región de solución</button>
-
-  <div id="error" class="error"></div>
-  <div id="calculator"></div>
-
-  <script>
-    const calculator = Desmos.GraphingCalculator(document.getElementById('calculator'), {
-      expressions: true,
-      settingsMenu: false,
-      keypad: false
-    });
-
-    function convertirALatex(expr) {
-      return expr
-        .replace(/<=/g, '\\le ')
-        .replace(/>=/g, '\\ge ')
-        .replace(/=/g, '=')
-        .replace(/</g, '<')
-        .replace(/>/g, '>');
-    }
-
-    function graficar() {
-      const ineq1 = document.getElementById('ineq1').value.trim();
-      const ineq2 = document.getElementById('ineq2').value.trim();
-      const errorDiv = document.getElementById('error');
-      errorDiv.innerText = "";
-
-      calculator.setExpressions([]);
-
-      try {
-        if (ineq1) {
-          const latex1 = convertirALatex(ineq1);
-          calculator.setExpression({ id: 'ineq1', latex: latex1 });
-        }
-        if (ineq2) {
-          const latex2 = convertirALatex(ineq2);
-          calculator.setExpression({ id: 'ineq2', latex: latex2 });
-        }
-      } catch (e) {
-        errorDiv.innerText = "❌ Error al graficar. Verifica tus desigualdades.";
-        console.error("Error al graficar:", e);
-      }
-    }
-  </script>
+  <iframe src="https://www.desmos.com/calculator?lang=es" allowfullscreen></iframe>
 
 </body>
 </html>
