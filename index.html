@@ -7,35 +7,35 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
       text-align: center;
-      padding: 20px;
+      background-color: #f4f4f4;
     }
     h2 {
-      margin-bottom: 10px;
+      margin-top: 20px;
     }
     .input-group {
-      margin: 10px;
+      margin: 15px;
     }
     input {
-      padding: 8px;
+      padding: 10px;
       font-size: 16px;
       width: 250px;
       margin: 5px;
     }
     button {
-      padding: 10px 20px;
+      margin-top: 10px;
+      padding: 10px 25px;
       font-size: 16px;
-      background-color: #6200EE;
+      background-color: #6200ee;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
     }
     #calculator {
       width: 100%;
       height: 500px;
-      margin-top: 20px;
+      margin-top: 30px;
     }
   </style>
 </head>
@@ -44,12 +44,8 @@
   <h2>Graficador de Desigualdades Lineales</h2>
 
   <div class="input-group">
-    <input type="text" id="ineq1" placeholder="Desigualdad 1: y<=7-2x">
-    <input type="text" id="ineq2" placeholder="Desigualdad 2: y>=x+1">
-  </div>
-  <div class="input-group">
-    <input type="text" id="ineq3" placeholder="Desigualdad 3: x>=0">
-    <input type="text" id="ineq4" placeholder="Desigualdad 4: y>=0">
+    <input type="text" id="ineq1" placeholder="Ej: y <= 7 - 2x">
+    <input type="text" id="ineq2" placeholder="Ej: y >= x + 3">
   </div>
 
   <button onclick="graficar()">Graficar región de solución</button>
@@ -63,21 +59,28 @@
       keypad: false
     });
 
+    function convertirALatex(expr) {
+      return expr
+        .replace(/<=/g, '\\le ')
+        .replace(/>=/g, '\\ge ')
+        .replace(/</g, '<')   // Estos ya están en LaTeX
+        .replace(/>/g, '>');
+    }
+
     function graficar() {
-      calculator.setExpressions([]);  // Limpia expresiones anteriores
+      calculator.setExpressions([]);
 
       const ineqs = [
         document.getElementById("ineq1").value.trim(),
-        document.getElementById("ineq2").value.trim(),
-        document.getElementById("ineq3").value.trim(),
-        document.getElementById("ineq4").value.trim()
+        document.getElementById("ineq2").value.trim()
       ];
 
-      let count = 1;
+      let id = 1;
       ineqs.forEach(expr => {
         if (expr !== "") {
-          calculator.setExpression({ id: "ineq" + count, latex: expr });
-          count++;
+          const latexExpr = convertirALatex(expr);
+          calculator.setExpression({ id: "ineq" + id, latex: latexExpr });
+          id++;
         }
       });
     }
