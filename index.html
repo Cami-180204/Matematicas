@@ -8,7 +8,7 @@
     body {
       font-family: Arial, sans-serif;
       text-align: center;
-      background-color: #f4f4f4;
+      background-color: #fff8e1;
       padding: 20px;
     }
     input {
@@ -18,7 +18,7 @@
     }
     button {
       padding: 10px 20px;
-      background-color: #6a00ff;
+      background-color: #d50000;
       color: white;
       border: none;
       border-radius: 5px;
@@ -33,10 +33,9 @@
 </head>
 <body>
 
-  <h2>Graficador de Desigualdades (sin Desmos)</h2>
-  <p>Formato: y <= m*x + b</p>
-  <input id="ineq1" placeholder="Ej: y <= -2x + 5">
-  <input id="ineq2" placeholder="Ej: y >= x - 3">
+  <h2>Graficador de Desigualdades (Estilo Python)</h2>
+  <p>Formato: y ≤ mx + b</p>
+  <input id="ineq1" placeholder="Ej: y <= 2.5x + 5">
   <br>
   <button onclick="graficar()">Graficar región de solución</button>
 
@@ -44,7 +43,6 @@
 
   <script>
     function parseInequality(str) {
-      // Convierte algo como "y <= -2x + 5" en una función evaluable
       let clean = str.replace(/\s/g, '');
       const match = clean.match(/y([<>]=?)(-?\d*\.?\d*)x([+-]\d*\.?\d*)/);
       if (!match) return null;
@@ -57,63 +55,44 @@
     }
 
     function graficar() {
-      const ineq1 = parseInequality(document.getElementById("ineq1").value);
-      const ineq2 = parseInequality(document.getElementById("ineq2").value);
-
-      if (!ineq1 || !ineq2) {
-        alert("Escribe desigualdades válidas como: y <= 2x + 5");
+      const ineq = parseInequality(document.getElementById("ineq1").value);
+      if (!ineq) {
+        alert("Ingresa una desigualdad válida como: y <= 2.5x + 5");
         return;
       }
 
-      const x = [];
-      const y1 = [], y2 = [];
-
-      for (let i = -10; i <= 10; i += 0.5) {
+      const x = [], yLinea = [], yRelleno = [];
+      for (let i = 0; i <= 10; i += 0.1) {
         x.push(i);
-        y1.push(ineq1.m * i + ineq1.b);
-        y2.push(ineq2.m * i + ineq2.b);
+        const y = ineq.m * i + ineq.b;
+        yLinea.push(y);
+        yRelleno.push(ineq.op.includes('<=') || ineq.op.includes('<') ? 25 : 5); // límite vertical
       }
 
-      // Región de solución (punto a punto)
-      const fillY = x.map((xi, i) => {
-        const yMin = Math.max(y1[i], y2[i]);
-        const yMax = Math.min(y1[i], y2[i]);
-        return [yMax, yMin]; // Intersección vertical
-      });
-
-      const trace1 = {
+      const linea = {
         x: x,
-        y: y1,
+        y: yLinea,
         mode: 'lines',
-        name: `y ${ineq1.op} ${ineq1.m}x + ${ineq1.b}`,
-        line: { color: 'blue' }
+        name: 'Línea de frontera',
+        line: { color: 'red', width: 2 }
       };
 
-      const trace2 = {
-        x: x,
-        y: y2,
-        mode: 'lines',
-        name: `y ${ineq2.op} ${ineq2.m}x + ${ineq2.b}`,
-        line: { color: 'green' }
-      };
-
-      const region = {
+      const relleno = {
         x: [...x, ...x.slice().reverse()],
-        y: [...fillY.map(v => v[1]), ...fillY.map(v => v[0]).reverse()],
+        y: [...yLinea, ...yRelleno.reverse()],
         fill: 'toself',
-        fillcolor: 'rgba(255, 0, 0, 0.2)',
+        fillcolor: 'rgba(0, 0, 255, 0.8)',
         type: 'scatter',
         line: { color: 'transparent' },
         name: 'Región de solución'
       };
 
-      const layout = {
-        title: 'Región de solución factible',
-        xaxis: { range: [-10, 10] },
-        yaxis: { range: [-10, 10] },
-      };
-
-      Plotly.newPlot('plot', [trace1, trace2, region], layout);
+      Plotly.newPlot('plot', [relleno, linea], {
+        xaxis: { range: [0, 10] },
+        yaxis: { range: [5, 25] },
+        title: 'Zona factible',
+        margin: { t: 30 }
+      });
     }
   </script>
 
