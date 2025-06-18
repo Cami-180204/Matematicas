@@ -19,4 +19,26 @@
 
   <h2>Graficador de Desigualdades con Dos Variables</h2>
   <label for="inequality">Ingresa una desigualdad (ejemplo: y &lt;= -x + 5):</label><br>
-  <input type="text" id="ine
+  <input type="text" id="inequality" placeholder="y <= -x + 5" size="30">
+  <button onclick="graficar()">Graficar</button>
+
+  <div id="calculator"></div>
+
+  <script>
+    // Crear el graficador Desmos
+    const elt = document.getElementById('calculator');
+    const calculator = Desmos.GraphingCalculator(elt, {
+      expressions: true,
+      settingsMenu: false
+    });
+
+    // Función para graficar la desigualdad
+    function graficar() {
+      const expr = document.getElementById('inequality').value;
+      calculator.setExpressions([]);
+      calculator.setExpression({ id: 'inequality1', latex: expr });
+    }
+  </script>
+
+</body>
+</html>
