@@ -1,100 +1,191 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Graficador de Desigualdades con Plotly</title>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background-color: #fff8e1;
-      padding: 20px;
-    }
-    input {
-      padding: 8px;
-      margin: 10px;
-      width: 200px;
-    }
-    button {
-      padding: 10px 20px;
-      background-color: #d50000;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    #plot {
-      width: 100%;
-      height: 600px;
-      margin-top: 20px;
-    }
-  </style>
-</head>
 <body>
 
-  <h2>Graficador de Desigualdades (Estilo Python)</h2>
-  <p>Formato: y ≤ mx + b</p>
-  <input id="ineq1" placeholder="Ej: y <= 2.5x + 5">
-  <br>
-  <button onclick="graficar()">Graficar región de solución</button>
+<h2>Graficador de Desigualdades</h2>
 
-  <div id="plot"></div>
+<div class="inputs">
+  <input type="text" id="ineq1" placeholder="Desigualdad 1 (ej: y<=2*x+5)">
+  <input type="text" id="ineq2" placeholder="Desigualdad 2 (opcional)">
+</div>
 
-  <script>
-    function parseInequality(str) {
-      let clean = str.replace(/\s/g, '');
-      const match = clean.match(/y([<>]=?)(-?\d*\.?\d*)x([+-]\d*\.?\d*)/);
-      if (!match) return null;
+<button onclick="graficar()">Graficar región de solución</button>
 
-      const op = match[1];
-      const m = parseFloat(match[2] || 1);
-      const b = parseFloat(match[3]);
+<br><br>
+<button onclick="zoomIn()">+</button>
+<button onclick="zoomOut()">-</button>
 
-      return { m, b, op };
+<canvas id="canvas" width="600" height="600"></canvas>
+<p><strong>Región de solución factible</strong></p>
+
+<script>
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  let scale = 40; // modificable por zoom
+  const width = canvas.width;
+  const height = canvas.height;
+
+  function origin() {
+    return { x: width / 2, y: height / 2 };
+  }
+
+  let currentIneq1 = "", currentIneq2 = "";
+
+  function evaluar(expr, x) {
+    try {
+      return Function("x", "return " + expr)(x);
+    } catch {
+      return NaN;
+    }
+  }
+
+  function limpiarCanvas() {
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, width, height);
+
+    // Cuadrícula
+    ctx.strokeStyle = "#eee";
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= width / scale; i++) {
+      const x = i * scale;
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
+    }
+    for (let i = 0; i <= height / scale; i++) {
+      const y = i * scale;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
     }
 
-    function graficar() {
-      const ineq = parseInequality(document.getElementById("ineq1").value);
-      if (!ineq) {
-        alert("Ingresa una desigualdad válida como: y <= 2.5x + 5");
-        return;
+    // Ejes
+    const o = origin();
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, o.y);
+    ctx.lineTo(width, o.y);
+    ctx.moveTo(o.x, 0);
+    ctx.lineTo(o.x, height);
+    ctx.stroke();
+
+    ctx.fillStyle = "#000";
+    ctx.font = "12px Arial";
+    for (let i = -Math.floor(o.x / scale); i <= Math.floor((width - o.x) / scale); i++) {
+      if (i !== 0) {
+        ctx.fillText(i, o.x + i * scale - 5, o.y + 15);
       }
-
-      const x = [], yLinea = [], yRelleno = [];
-      for (let i = 0; i <= 10; i += 0.1) {
-        x.push(i);
-        const y = ineq.m * i + ineq.b;
-        yLinea.push(y);
-        yRelleno.push(ineq.op.includes('<=') || ineq.op.includes('<') ? 25 : 5); // límite vertical
-      }
-
-      const linea = {
-        x: x,
-        y: yLinea,
-        mode: 'lines',
-        name: 'Línea de frontera',
-        line: { color: 'red', width: 2 }
-      };
-
-      const relleno = {
-        x: [...x, ...x.slice().reverse()],
-        y: [...yLinea, ...yRelleno.reverse()],
-        fill: 'toself',
-        fillcolor: 'rgba(0, 0, 255, 0.8)',
-        type: 'scatter',
-        line: { color: 'transparent' },
-        name: 'Región de solución'
-      };
-
-      Plotly.newPlot('plot', [relleno, linea], {
-        xaxis: { range: [0, 10] },
-        yaxis: { range: [5, 25] },
-        title: 'Zona factible',
-        margin: { t: 30 }
-      });
     }
-  </script>
+    for (let i = -Math.floor(o.y / scale); i <= Math.floor((height - o.y) / scale); i++) {
+      if (i !== 0) {
+        ctx.fillText(-i, o.x + 5, o.y + i * scale + 3);
+      }
+    }
+  }
 
+  function graficarLinea(expr, color) {
+    const o = origin();
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    let started = false;
+    for (let x = -o.x / scale; x <= (width - o.x) / scale; x += 0.1) {
+      const y = evaluar(expr, x);
+      if (!isNaN(y)) {
+        const px = o.x + x * scale;
+        const py = o.y - y * scale;
+        if (!started) {
+          ctx.moveTo(px, py);
+          started = true;
+        } else {
+          ctx.lineTo(px, py);
+        }
+      }
+    }
+    ctx.stroke();
+  }
+
+  function sombrear(expr, tipo, color) {
+    const o = origin();
+    for (let x = -o.x / scale; x <= (width - o.x) / scale; x += 0.1) {
+      const y = evaluar(expr, x);
+      if (!isNaN(y)) {
+        const px = o.x + x * scale;
+        const py = o.y - y * scale;
+        ctx.fillStyle = color;
+        if (tipo.includes("<")) {
+          ctx.fillRect(px, py, 1, height - py);
+        } else {
+          ctx.fillRect(px, 0, 1, py);
+        }
+      }
+    }
+  }
+
+  function sombrearInterseccion(expr1, tipo1, expr2, tipo2) {
+    const o = origin();
+    for (let x = -o.x / scale; x <= (width - o.x) / scale; x += 0.1) {
+      const y1 = evaluar(expr1, x);
+      const y2 = evaluar(expr2, x);
+      if (!isNaN(y1) && !isNaN(y2)) {
+        const px = o.x + x * scale;
+        if (tipo1.includes("<") && tipo2.includes("<")) {
+          const yMin = Math.min(y1, y2);
+          ctx.fillStyle = "orange";
+          ctx.fillRect(px, o.y - yMin * scale, 1, height - (o.y - yMin * scale));
+        } else if (tipo1.includes(">") && tipo2.includes(">")) {
+          const yMax = Math.max(y1, y2);
+          ctx.fillStyle = "orange";
+          ctx.fillRect(px, 0, 1, o.y - yMax * scale);
+        }
+      }
+    }
+  }
+
+  function graficar() {
+    const input1 = document.getElementById("ineq1").value.trim();
+    const input2 = document.getElementById("ineq2").value.trim();
+    currentIneq1 = input1;
+    currentIneq2 = input2;
+
+    limpiarCanvas();
+
+    const match1 = input1.match(/y\s*([<>]=?)\s*(.+)/);
+    const match2 = input2.match(/y\s*([<>]=?)\s*(.+)/);
+
+    if (!match1) {
+      alert("La desigualdad 1 no tiene el formato correcto.");
+      return;
+    }
+
+    const op1 = match1[1];
+    const expr1 = match1[2];
+
+    if (match2) {
+      const op2 = match2[1];
+      const expr2 = match2[2];
+      sombrearInterseccion(expr1, op1, expr2, op2);
+      graficarLinea(expr1, "green");
+      graficarLinea(expr2, "purple");
+    } else {
+      sombrear(expr1, op1, "coral");
+      graficarLinea(expr1, "green");
+    }
+  }
+
+  function zoomIn() {
+    scale += 10;
+    graficar(); // Redibuja con la escala actual
+  }
+
+  function zoomOut() {
+    if (scale > 10) {
+      scale -= 10;
+      graficar();
+    }
+  }
+
+  limpiarCanvas();
+</script>
 </body>
-</html>
