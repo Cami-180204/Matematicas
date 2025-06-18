@@ -1,25 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <title>Graficador de Desigualdades Lineales</title>
-  <script src="https://www.desmos.com/api/v1.6/calculator.js?apiKey=YOUR_API_KEY"></script>
+  <script src="https://www.desmos.com/api/v1.6/calculator.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
       background-color: #f4f4f4;
-    }
-    .container {
-      max-width: 800px;
-      margin: auto;
+      text-align: center;
       padding: 20px;
     }
-    input {
+    h2 {
+      margin-bottom: 10px;
+    }
+    .input-group {
       margin: 10px;
+    }
+    input {
       padding: 8px;
       font-size: 16px;
       width: 250px;
+      margin: 5px;
     }
     button {
       padding: 10px 20px;
@@ -39,21 +41,20 @@
 </head>
 <body>
 
-  <div class="container">
-    <h2>Graficador de Desigualdades Lineales</h2>
+  <h2>Graficador de Desigualdades Lineales</h2>
 
-    <div>
-      <input type="text" id="ineq1" placeholder="Desigualdad 1 (ej. y<=7-2x)">
-      <input type="text" id="ineq2" placeholder="Desigualdad 2 (opcional)">
-      <br>
-      <input type="text" id="ineq3" placeholder="Desigualdad 3 (opcional)">
-      <input type="text" id="ineq4" placeholder="Desigualdad 4 (opcional)">
-    </div>
-
-    <button onclick="graficar()">Graficar región de solución</button>
-
-    <div id="calculator"></div>
+  <div class="input-group">
+    <input type="text" id="ineq1" placeholder="Desigualdad 1: y<=7-2x">
+    <input type="text" id="ineq2" placeholder="Desigualdad 2: y>=x+1">
   </div>
+  <div class="input-group">
+    <input type="text" id="ineq3" placeholder="Desigualdad 3: x>=0">
+    <input type="text" id="ineq4" placeholder="Desigualdad 4: y>=0">
+  </div>
+
+  <button onclick="graficar()">Graficar región de solución</button>
+
+  <div id="calculator"></div>
 
   <script>
     const calculator = Desmos.GraphingCalculator(document.getElementById('calculator'), {
@@ -63,22 +64,19 @@
     });
 
     function graficar() {
-      // Limpiar expresiones previas
-      calculator.setExpressions([]);
+      calculator.setExpressions([]);  // Limpia expresiones anteriores
 
-      // Obtener valores de entradas
-      const inputs = [
-        document.getElementById('ineq1').value,
-        document.getElementById('ineq2').value,
-        document.getElementById('ineq3').value,
-        document.getElementById('ineq4').value
+      const ineqs = [
+        document.getElementById("ineq1").value.trim(),
+        document.getElementById("ineq2").value.trim(),
+        document.getElementById("ineq3").value.trim(),
+        document.getElementById("ineq4").value.trim()
       ];
 
-      // Filtrar entradas vacías y asignar IDs únicos
       let count = 1;
-      inputs.forEach(expr => {
-        if (expr.trim() !== '') {
-          calculator.setExpression({ id: 'ineq' + count, latex: expr.trim() });
+      ineqs.forEach(expr => {
+        if (expr !== "") {
+          calculator.setExpression({ id: "ineq" + count, latex: expr });
           count++;
         }
       });
@@ -87,4 +85,3 @@
 
 </body>
 </html>
-
